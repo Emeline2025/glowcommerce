@@ -229,68 +229,69 @@ jobs:
                 sarif_file: 'trivy-docker-results.sarif'
 
     # Job 4: Deploy (si main seulement)
-    deploy:
-        runs-on: ubuntu-latest
-        
-        steps:
-            - name: Deploy to production
-              env:
-                DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-                JWT_SECRET: ${{ secrets.JWT_SECRET }}
-              run: |
-                echo "Deploying with secure secrets..."
-                # Les secrets ne seront jamais affichés dans les logs
+#    deploy:
+#        runs-on: ubuntu-latest
+#        needs: [build-and-test, security-scan, docker-build]
 
-            - name: Import secrets from Vault
-              uses: hashicorp/vault-action@v2
-              with:
-                url: ${{ secrets.VAULT_ADDR }}
-                token: ${{ secrets.VAULT_TOKEN }}
-                secrets: |
-                    secret/data/glowcommerce db_password | DB_PASSWORD ;
-                    secret/data/glowcommerce jwt_secret | JWT_SECRET
+#        steps:
+#            - name: Deploy to production
+#              env:
+#                DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+#                JWT_SECRET: ${{ secrets.JWT_SECRET }}
+#              run: |
+#                echo "Deploying with secure secrets..."
+#                # Les secrets ne seront jamais affichés dans les logs
+
+#            - name: Import secrets from Vault
+#              uses: hashicorp/vault-action@v2
+#              with:
+#                url: ${{ secrets.VAULT_ADDR }}
+#                token: ${{ secrets.VAULT_TOKEN }}
+#                secrets: |
+#                    secret/data/glowcommerce db_password | DB_PASSWORD ;
+#                    secret/data/glowcommerce jwt_secret | JWT_SECRET
 
     # Job 5 : Notify
-    notify:
-        runs-on: ubuntu-latest
-        needs: [build-and-test, security-scan, docker-build]
-        if: always()
+#    notify:
+#        runs-on: ubuntu-latest
+#        needs: [build-and-test, security-scan, docker-build]
+#        if: always()
 
-        steps:
-            - name: Send Slack notification (success)
-              if: success()
-              uses: slackapi/slack-github-action@v1.24.0
-              with:
-                payload: |
-                    {
-                        "text": "✅ Pipeline SUCCESS",
-                        "blocks": [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": "*✅ Pipeline réussi pour GlowCommerce*\n*Commit:* ${{ github.sha }}\n*Branch:* ${{ github.ref_name }}\n*Author:* ${{ github.actor }}"
-                            }
-                        }]
-                    }
-              env:
-                SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+#        steps:
+#            - name: Send Slack notification (success)
+#              if: success()
+#              uses: slackapi/slack-github-action@v1.24.0
+#              with:
+#                payload: |
+#                    {
+#                        "text": "✅ Pipeline SUCCESS",
+#                        "blocks": [
+#                        {
+#                            "type": "section",
+#                            "text": {
+#                                "type": "mrkdwn",
+#                                "text": "*✅ Pipeline réussi pour GlowCommerce*\n*Commit:* ${{ github.sha }}\n*Branch:* ${{ github.ref_name }}\n*Author:* ${{ github.actor }}"
+#                            }
+#                        }]
+#                    }
+#              env:
+#                SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-            - name: Send Slack notification (failure)
-              if: failure()
-              uses: slackapi/slack-github-action@v1.24.0
-              with:
-                payload: |
-                    {
-                        "text": "❌ Pipeline FAILED",
-                        "blocks": [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": "*❌ Pipeline échoué pour GlowCommerce*\n*Commit:* ${{ github.sha }}\n*Branch:* ${{ github.ref_name }}\n*Author:* ${{ github.actor }}\n*Logs:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                            }
-                        }]
-                    }
-              env:
-                SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+#            - name: Send Slack notification (failure)
+#              if: failure()
+#              uses: slackapi/slack-github-action@v1.24.0
+#              with:
+#                payload: |
+#                    {
+#                        "text": "❌ Pipeline FAILED",
+#                        "blocks": [
+#                        {
+#                            "type": "section",
+#                            "text": {
+#                                "type": "mrkdwn",
+#                                "text": "*❌ Pipeline échoué pour GlowCommerce*\n*Commit:* ${{ github.sha }}\n*Branch:* ${{ github.ref_name }}\n*Author:* ${{ github.actor }}\n*Logs:* ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+#                            }
+#                        }]
+#                    }
+#              env:
+#                SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
